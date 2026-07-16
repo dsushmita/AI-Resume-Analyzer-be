@@ -1,0 +1,40 @@
+# Local dev infrastructure: Postgres + Redis. The Nest app itself runs on the host.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: resume_analyzer_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: resume_analyzer
+    # Host port 5434 keeps us clear of other Postgres instances already on 5432/5433
+    ports:
+      - '5434:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: resume_analyzer_redis
+    restart: unless-stopped
+    # Host port 6380 keeps us clear of the Redis already on 6379
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+# Named volumes persist data across container restarts
+volumes:
+  postgres_data:
+  redis_data:
