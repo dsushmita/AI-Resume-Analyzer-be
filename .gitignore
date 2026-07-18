@@ -1,9 +1,14 @@
 # Dependencies
 /node_modules
+node_modules/*
+./node_modules
 
 # Build output
 /dist
 /build
+dist/*
+./build
+./dist
 
 # Secrets — never commit real credentials
 .env
