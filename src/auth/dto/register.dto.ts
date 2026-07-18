@@ -1,4 +1,5 @@
-// A DTO is a class whose only job is to describe, validate, and transfer data between the client and your application.
+// A DTO is a class whose only job is to describe, validate, and transfer data between the client and your application.\
+//dto stand for data transfer object. It is a design pattern that is used to transfer data between software application subsystems. DTOs are often used in conjunction with data access objects to retrieve data from a database. DTOs are also used to transfer data between different layers of an application, such as the presentation layer and the business logic layer. DTOs are often used to encapsulate data and send it over the network. DTOs are also used to transfer data between different processes or threads.
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class RegisterDto {
