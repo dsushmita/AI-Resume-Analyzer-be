@@ -1,8 +1,19 @@
-import { Body, Controller, HttpCode, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
+import { CurrentUser } from './decorators/current-user.decorator';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { AccessTokenGuard } from './guards/access-token.guard';
+import { AccessTokenPayload } from './token.service';
 
 @Controller('auth')
 export class AuthController {
@@ -45,5 +56,11 @@ export class AuthController {
       organizationId: result.organizationId,
       role: result.role,
     };
+  }
+
+  @Get('me')
+  @UseGuards(AccessTokenGuard)
+  me(@CurrentUser() user: AccessTokenPayload) {
+    return user;
   }
 }
