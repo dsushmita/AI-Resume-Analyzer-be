@@ -13,7 +13,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { AccessTokenGuard } from './guards/access-token.guard';
-import { AccessTokenPayload } from './token.service';
+import type { AccessTokenPayload } from './token.service';
 
 @Controller('auth')
 export class AuthController {

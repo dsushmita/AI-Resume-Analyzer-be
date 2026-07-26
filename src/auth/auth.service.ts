@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PasswordService } from './password.service';
 import { RegisterDto } from './dto/register.dto';
@@ -92,5 +96,77 @@ export class AuthService {
       organizationId: membership.organizationId,
       role: membership.role,
     };
+  }
+
+  async refresh(refreshToken: string) {
+    // 1. Signature + expiry must check out
+    let payload: { sub: string };
+    try {
+      payload = await this.tokens.verifyRefreshToken(refreshToken);
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+    // 2. The token must still be live in the database (not rotated away or revoked)
+    const tokenHash = this.tokens.hashToken(refreshToken);
+    const stored = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash },
+    });
+    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
+      throw new UnauthorizedException('Refresh token no longer valid');
+    }
+
+    // 3. Reload user + membership so the new access token reflects current role/org
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      include: { memberships: { take: 1, orderBy: { createdAt: 'asc' } } },
+    });
+    const membership = user?.memberships[0];
+    if (!user || !membership) {
+      throw new UnauthorizedException('User no longer valid');
+    }
+
+    const accessToken = await this.tokens.signAccessToken({
+      sub: user.id,
+      organizationId: membership.organizationId,
+      role: membership.role,
+    });
+    const newRefreshToken = await this.tokens.signRefreshToken(user.id);
+
+    // 4. Rotate atomically: kill the old token and store the new one, all-or-nothing
+    await this.prisma.$transaction([
+      this.prisma.refreshToken.update({
+        where: { id: stored.id },
+        data: { revokedAt: new Date() },
+      }),
+      this.prisma.refreshToken.create({
+        data: {
+          tokenHash: this.tokens.hashToken(newRefreshToken),
+          userId: user.id,
+          expiresAt: new Date(
+            Date.now() + Number(process.env.JWT_REFRESH_TTL) * 1000,
+          ),
+        },
+      }),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken: newRefreshToken,
+      user: { id: user.id, email: user.email, name: user.name },
+      organizationId: membership.organizationId,
+      role: membership.role,
+    };
+  }
+
+  async logout(refreshToken: string | undefined) {
+    if (!refreshToken) return;
+    // updateMany so a missing/already-revoked token is a no-op, not an error
+    await this.prisma.refreshToken.updateMany({
+      where: {
+        tokenHash: this.tokens.hashToken(refreshToken),
+        revokedAt: null,
+      },
+      data: { revokedAt: new Date() },
+    });
   }
 }

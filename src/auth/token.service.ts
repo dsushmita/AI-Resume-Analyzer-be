@@ -33,6 +33,12 @@ export class TokenService {
     );
   }
 
+  verifyRefreshToken(token: string): Promise<{ sub: string }> {
+    return this.jwt.verifyAsync(token, {
+      secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+    });
+  }
+
   // Refresh tokens are long and random, so a fast digest is enough — bcrypt is for human passwords
   hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
