@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
+  // Create the NestJS application using the AppModule
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   // Enforce DTO rules globally; strip unknown fields; reject requests with extras
