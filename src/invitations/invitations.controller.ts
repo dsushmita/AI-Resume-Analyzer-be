@@ -16,8 +16,9 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 import type { AccessTokenPayload } from 'src/auth/token.service';
 import { InvitationsService } from './invitations.service';
-import { CreateInvitationDto } from './dto/create-invitation.dto';
+
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
+import { CreateInvitationDto } from './dto/create-invitation.dto';
 
 @Controller('invitations')
 export class InvitationsController {
