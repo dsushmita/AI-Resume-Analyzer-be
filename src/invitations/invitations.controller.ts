@@ -8,14 +8,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Role } from '@prisma/client';
-import { InvitationsService } from '../invitations.service';
+
 import { AccessTokenGuard } from 'src/auth/guards/access-token.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { CreateInvitationDto } from './create-invitation.dto';
+
 import type { AccessTokenPayload } from 'src/auth/token.service';
-import { AcceptInvitationDto } from './accept-invitation.dto';
+import { InvitationsService } from './invitations.service';
+import { CreateInvitationDto } from './dto/create-invitation.dto';
+import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 
 @Controller('invitations')
 export class InvitationsController {

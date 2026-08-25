@@ -5,8 +5,7 @@ import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
-import { InvitationsModule } from './invitations/dto/invitations.module';
-
+import { InvitationsModule } from './invitations/invitations.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
